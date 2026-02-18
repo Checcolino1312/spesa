@@ -2,6 +2,15 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import {
+  ArrowLeft,
+  ShoppingCart,
+  Mic,
+  Square,
+  Loader2,
+  Check,
+  AlertCircle,
+} from "lucide-react";
 
 interface TranscribeResult {
   transcript: string;
@@ -81,56 +90,78 @@ export default function ParlaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="text-orange-600 hover:text-orange-800 text-sm">
-            &larr; Home
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-surface/80 backdrop-blur-lg border-b border-border">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 text-text-secondary hover:text-text-primary text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Home
           </Link>
-          <Link href="/lista" className="text-orange-600 hover:text-orange-800 text-sm">
-            Vedi lista &rarr;
+          <h1 className="font-semibold text-text-primary text-[15px]">
+            Registra la spesa
+          </h1>
+          <Link
+            href="/lista"
+            className="flex items-center gap-1.5 text-primary hover:text-primary-dark text-sm font-medium"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Lista
           </Link>
         </div>
+      </header>
 
-        <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
-          Registra la spesa
-        </h1>
-        <p className="text-gray-500 text-center mb-8 text-sm">
+      <div className="max-w-lg mx-auto px-4 py-8">
+        <p className="text-text-secondary text-center text-sm mb-10">
           Premi il microfono e di&apos; cosa ti serve
         </p>
 
-        {/* Mic button */}
-        <div className="flex justify-center mb-8">
-          <button
-            onClick={isRecording ? stopRecording : startRecording}
-            disabled={isProcessing}
-            className={`w-28 h-28 rounded-full flex items-center justify-center transition-all shadow-lg ${
-              isRecording
-                ? "bg-red-500 hover:bg-red-600 animate-pulse scale-110"
-                : isProcessing
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-orange-500 hover:bg-orange-600 hover:scale-105 active:scale-95"
-            }`}
-          >
-            {isProcessing ? (
-              <svg className="w-10 h-10 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            ) : isRecording ? (
-              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <rect x="6" y="6" width="12" height="12" rx="2" />
-              </svg>
-            ) : (
-              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-              </svg>
+        {/* Mic button with animated ring */}
+        <div className="flex justify-center mb-6">
+          <div className="relative">
+            {/* Animated rings when recording */}
+            {isRecording && (
+              <>
+                <div className="absolute inset-0 rounded-full bg-danger/20 animate-pulse-ring" />
+                <div
+                  className="absolute inset-0 rounded-full bg-danger/10 animate-pulse-ring"
+                  style={{ animationDelay: "0.4s" }}
+                />
+              </>
             )}
-          </button>
+            <button
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isProcessing}
+              className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all ${
+                isRecording
+                  ? "bg-danger scale-110"
+                  : isProcessing
+                  ? "bg-text-tertiary cursor-not-allowed"
+                  : "bg-primary hover:bg-primary-dark hover:scale-105 active:scale-95"
+              }`}
+              style={{
+                boxShadow: isRecording
+                  ? "0 8px 32px rgba(225, 112, 85, 0.4)"
+                  : isProcessing
+                  ? "none"
+                  : "0 8px 32px rgba(108, 92, 231, 0.4)",
+              }}
+            >
+              {isProcessing ? (
+                <Loader2 className="w-9 h-9 text-white animate-spin" />
+              ) : isRecording ? (
+                <Square className="w-8 h-8 text-white" fill="white" />
+              ) : (
+                <Mic className="w-9 h-9 text-white" />
+              )}
+            </button>
+          </div>
         </div>
 
-        <p className="text-center text-sm text-gray-400 mb-6">
+        <p className="text-center text-sm text-text-tertiary mb-8">
           {isRecording
             ? "Sto ascoltando... Premi per fermare"
             : isProcessing
@@ -140,42 +171,60 @@ export default function ParlaPage() {
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-            <p className="text-red-700 text-sm">{error}</p>
+          <div className="flex items-start gap-3 bg-danger-light border border-danger/20 rounded-xl p-4 mb-4">
+            <AlertCircle className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" />
+            <p className="text-danger text-sm">{error}</p>
           </div>
         )}
 
         {/* Result */}
         {result && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
+          <div
+            className="bg-surface rounded-xl border border-border p-5 space-y-4"
+            style={{ boxShadow: "var(--shadow-md)" }}
+          >
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Trascrizione</p>
-              <p className="text-gray-700 text-sm italic">&ldquo;{result.transcript}&rdquo;</p>
+              <p className="text-xs text-text-tertiary uppercase tracking-wider font-medium mb-1">
+                Trascrizione
+              </p>
+              <p className="text-text-secondary text-sm italic">
+                &ldquo;{result.transcript}&rdquo;
+              </p>
             </div>
 
             {result.items.length > 0 ? (
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">
+                <p className="text-xs text-text-tertiary uppercase tracking-wider font-medium mb-2">
                   Prodotti aggiunti ({result.items.length})
                 </p>
-                <ul className="space-y-1">
+                <ul className="space-y-1.5">
                   {result.items.map((item) => (
                     <li
                       key={item.id}
-                      className="flex items-center gap-2 text-sm text-gray-700 bg-green-50 rounded-lg px-3 py-2"
+                      className="flex items-center gap-2.5 text-sm text-text-primary bg-success-light rounded-lg px-3 py-2.5"
                     >
-                      <span className="text-green-500">&#10003;</span>
+                      <Check className="w-4 h-4 text-success flex-shrink-0" />
                       <span className="font-medium">{item.name}</span>
                       {item.quantity && (
-                        <span className="text-gray-400 text-xs">({item.quantity})</span>
+                        <span className="text-text-tertiary text-xs ml-auto">
+                          {item.quantity}
+                        </span>
                       )}
                     </li>
                   ))}
                 </ul>
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">{result.message}</p>
+              <p className="text-text-secondary text-sm">{result.message}</p>
             )}
+
+            <Link
+              href="/lista"
+              className="flex items-center justify-center gap-2 w-full bg-primary/10 text-primary text-sm font-medium py-2.5 rounded-xl hover:bg-primary/20 transition-colors"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Vai alla lista
+            </Link>
           </div>
         )}
       </div>
