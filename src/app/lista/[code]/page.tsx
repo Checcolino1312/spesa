@@ -137,12 +137,25 @@ export default function ListaCodePage({ params }: { params: Promise<{ code: stri
 
   const shareList = async () => {
     const url = `${window.location.origin}/lista/${code}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // fallback
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Lista Spesa",
+          text: `Unisciti alla mia lista della spesa! Codice: ${code}`,
+          url,
+        });
+      } catch {
+        // user cancelled share
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // ignore
+      }
     }
   };
 
