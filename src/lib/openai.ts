@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { CATEGORY_KEYS } from "./categories";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -20,7 +21,9 @@ export async function transcribeAudio(audioBuffer: Buffer, mimeType: string): Pr
 
 export async function extractGroceryItems(
   text: string
-): Promise<{ name: string; quantity?: string }[]> {
+): Promise<{ name: string; quantity?: string; category?: string }[]> {
+  const categoryList = CATEGORY_KEYS.join(", ");
+
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     temperature: 0,
@@ -30,11 +33,13 @@ export async function extractGroceryItems(
         role: "system",
         content: `Sei un assistente per la lista della spesa. Dall'input dell'utente, estrai i prodotti da comprare.
 Rispondi SOLO con un JSON valido nel formato:
-{"items": [{"name": "nome prodotto", "quantity": "quantità se specificata"}]}
+{"items": [{"name": "nome prodotto", "quantity": "quantità se specificata", "category": "categoria"}]}
 - Normalizza i nomi (prima lettera maiuscola)
 - Se la quantità non è specificata, ometti il campo quantity
 - Raggruppa duplicati sommando le quantità
-- Ignora parole non relative a prodotti (saluti, riempitivi, ecc.)`,
+- Ignora parole non relative a prodotti (saluti, riempitivi, ecc.)
+- Assegna a ogni prodotto una delle seguenti categorie: ${categoryList}
+- Se non sai la categoria, usa "Altro"`,
       },
       {
         role: "user",

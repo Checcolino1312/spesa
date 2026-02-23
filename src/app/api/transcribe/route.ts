@@ -6,9 +6,14 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const audioFile = formData.get("audio") as File | null;
+    const code = formData.get("code") as string | null;
 
     if (!audioFile) {
       return NextResponse.json({ error: "Nessun file audio ricevuto" }, { status: 400 });
+    }
+
+    if (!code) {
+      return NextResponse.json({ error: "Codice lista mancante" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await audioFile.arrayBuffer());
@@ -33,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Salva nella lista
-    const savedItems = await addItems(extractedItems);
+    const savedItems = await addItems(code, extractedItems);
 
     return NextResponse.json({
       transcript,
